@@ -82,5 +82,6 @@ uv venv
 ## 3️⃣ Activate Virtual Environment
 Mac / Linux
 source .venv/bin/activate
+
 Windows
 .venv\Scripts\activate
