@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoGuesser AI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 0.9rem; }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+    }
+    .drop-zone {
+      border: 2px dashed #475569;
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      margin-bottom: 1rem;
+    }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: #60a5fa; }
+    .drop-zone input { display: none; }
+    .drop-zone label {
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: #94a3b8;
+    }
+    .drop-zone label span.icon { font-size: 2rem; }
+    #preview {
+      max-width: 100%;
+      max-height: 250px;
+      border-radius: 6px;
+      display: none;
+      margin: 0.75rem auto;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover:not(:disabled) { background: #2563eb; }
+    button:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+    #status { margin-top: 1rem; text-align: center; color: #94a3b8; font-size: 0.9rem; min-height: 1.2rem; }
+    #result {
+      margin-top: 1.5rem;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1.25rem;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      display: none;
+    }
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid #475569;
+      border-top-color: #60a5fa;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <h1>GeoGuesser AI</h1>
+  <p class="subtitle">Upload an image and let the AI guess where it was taken</p>
+
+  <div class="card">
+    <div class="drop-zone" id="dropZone">
+      <label for="fileInput">
+        <span class="icon">🗺️</span>
+        <span>Click to select or drag & drop an image</span>
+        <span style="font-size:0.8rem; color:#64748b;">JPG, PNG, WEBP</span>
+      </label>
+      <input type="file" id="fileInput" accept="image/*" />
+    </div>
+
+    <img id="preview" alt="Preview" />
+
+    <button id="submitBtn" disabled>Identify Location</button>
+    <div id="status"></div>
+    <pre id="result"></pre>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
+    const preview = document.getElementById('preview');
+    const submitBtn = document.getElementById('submitBtn');
+    const status = document.getElementById('status');
+    const result = document.getElementById('result');
+
+    let selectedFile = null;
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) setFile(file);
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) setFile(fileInput.files[0]);
+    });
+
+    function setFile(file) {
+      selectedFile = file;
+      const url = URL.createObjectURL(file);
+      preview.src = url;
+      preview.style.display = 'block';
+      submitBtn.disabled = false;
+      result.style.display = 'none';
+      status.textContent = '';
+    }
+
+    submitBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      submitBtn.disabled = true;
+      result.style.display = 'none';
+      status.innerHTML = '<span class="spinner"></span>Analyzing image...';
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      try {
+        const res = await fetch('/identify_location', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        const data = await res.json();
+        result.textContent = data.result;
+        result.style.display = 'block';
+        status.textContent = '';
+      } catch (err) {
+        status.textContent = '⚠️ ' + err.message;
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

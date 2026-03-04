@@ -1,9 +1,12 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from PIL import Image
 import ollama
 import io
 
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
 
 prompt = (
     "You are a geographic expert tasked with identifying the location in this image? "
@@ -32,6 +35,6 @@ async def identify_location(file: UploadFile = File(...)):
 
     return {"result": response["message"]["content"]}
 
-@app.get("/")
-def root():
-    return {"message": "Hello World"}
+@app.get("/", response_class=HTMLResponse)
+def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
