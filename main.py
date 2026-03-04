@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -12,7 +13,7 @@ prompt = (
     "You are a geographic expert tasked with identifying the location in this image? "
     "reason step by step and provide a detailed answer about what region of the world this photo was likely taken in. "
     "First consider, climate clues, vegetation, architecture, famous landmarks, textual language (if present), "
-    "technological features and anything else. "
+    "technological features and anything else. Give short concise responces. Provide an exact location like one country or one city for exact location. "
     "Format your response as:\n"
     "1. Clue analysis:\n"
     "2. Most Likely location:\n"
@@ -28,7 +29,8 @@ async def identify_location(file: UploadFile = File(...)):
     image.save(buffer, format="JPEG")
     image_bytes = buffer.getvalue()
 
-    response = ollama.chat(
+    response = await asyncio.to_thread(
+        ollama.chat,
         model="llava",
         messages=[{"role": "user", "content": prompt, "images": [image_bytes]}]
     )
