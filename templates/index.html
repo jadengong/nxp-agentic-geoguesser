@@ -94,6 +94,24 @@
       font-size: 0.95rem;
       display: none;
     }
+    #fun-fact-box {
+      margin-top: 1rem;
+      background: #0f172a;
+      border: 1px solid #1d4ed8;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #93c5fd;
+      display: none;
+    }
+    #fun-fact-box .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #3b82f6;
+      margin-bottom: 0.4rem;
+    }
     .spinner {
       display: inline-block;
       width: 14px; height: 14px;
@@ -124,9 +142,13 @@
     </div>
 
     <button id="submitBtn" disabled>Identify Location</button>
-    <p class="hint">First analysis may take 30–60 seconds (CLIP + AI). You’ll see progress below.</p>
+    <p class="hint">First analysis may take 30–60 seconds (CLIP + AI). You'll see progress below.</p>
     <div id="status"></div>
     <pre id="result"></pre>
+    <div id="fun-fact-box">
+      <div class="label">💡 Fun Fact</div>
+      <div id="fun-fact-text"></div>
+    </div>
   </div>
 
   <script>
@@ -136,6 +158,8 @@
     const submitBtn = document.getElementById('submitBtn');
     const status = document.getElementById('status');
     const result = document.getElementById('result');
+    const funFactBox = document.getElementById('fun-fact-box');
+    const funFactText = document.getElementById('fun-fact-text');
 
     let selectedFile = null;
 
@@ -164,6 +188,8 @@
       dropZone.classList.add('has-image');
       submitBtn.disabled = false;
       result.style.display = 'none';
+      funFactBox.style.display = 'none';
+      funFactText.textContent = '';
       status.textContent = '';
     }
 
@@ -172,12 +198,34 @@
       fileInput.click();
     });
 
+    async function fetchFunFact(ollamaResult) {
+      funFactBox.style.display = 'block';
+      funFactText.innerHTML = '<span class="spinner"></span>Fetching fun fact...';
+      try {
+        const res = await fetch('/fun_fact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ result: ollamaResult }),
+        });
+        const data = await res.json();
+        if (data.fun_fact) {
+          funFactText.textContent = data.fun_fact;
+        } else {
+          funFactBox.style.display = 'none';
+        }
+      } catch (err) {
+        funFactBox.style.display = 'none';
+      }
+    }
+
     submitBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
 
       submitBtn.disabled = true;
       result.style.display = 'block';
       result.textContent = '';
+      funFactBox.style.display = 'none';
+      funFactText.textContent = '';
       status.innerHTML = '<span class="spinner"></span>Getting visual labels...';
 
       const formData = new FormData();
@@ -208,6 +256,7 @@
                   status.textContent = '';
                 } else if (data.stage === 'done') {
                   status.textContent = '';
+                  await fetchFunFact(result.textContent);
                 }
               } catch (_) {}
             }

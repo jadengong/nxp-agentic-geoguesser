@@ -12,6 +12,8 @@ import ollama
 
 import image_detection
 
+from fun_fact import extract_location, get_fun_fact
+
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
@@ -138,3 +140,13 @@ async def identify_location_stream(file: UploadFile = File(...)):
 @app.get("/", response_class=HTMLResponse)
 def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.post("/fun_fact")
+async def fun_fact(request: Request):
+    body = await request.json()
+    ollama_result = body.get("result", "")
+    location = extract_location(ollama_result)
+    if not location:
+        return {"fun_fact": None}
+    fact = await asyncio.to_thread(get_fun_fact, location)
+    return {"fun_fact": fact, "location": location}

@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+
+# uv
+.uv/
+
+# ML model cache (HuggingFace / CLIP)
+.cache/
+~/.cache/huggingface/
+*.bin
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+# Ollama models are stored globally, not in project — nothing to ignore
+
+# Uploaded / temp images
+uploads/
+tmp/
+*.jpg
+*.jpeg
+*.png
+*.webp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.venv/
+.idea/
+.vscode/
+*.swp
