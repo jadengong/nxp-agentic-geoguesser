@@ -1,9 +1,12 @@
 [project]
 name = "nxp-agentic-geoguesser"
 version = "0.1.0"
-description = "Add your description here"
+description = "Agentic AI geoguesser using AWS Bedrock, Rekognition, Lambda, and CLIP image classification"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
     "fastapi[standard]>=0.135.1",
+    "transformers>=4.45.0",
+    "pillow>=10.0.0",
+    "torch>=2.0.0",
 ]

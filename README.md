@@ -37,12 +37,14 @@ The architecture is serverless, scalable, and production-ready.
 - Amazon Rekognition (Image analysis)
 
 ## 🧩 Service Responsibilities
-Service	Purpose
-Amazon Bedrock	LLM reasoning, text generation, planning
-Amazon Rekognition	Image detection and labeling
-AWS Lambda	Core agent logic and orchestration
-API Gateway	Public HTTP interface
-Amazon S3	Static frontend hosting        
+
+| Service           | Purpose                                    |
+|-------------------|--------------------------------------------|
+| Amazon Bedrock    | LLM reasoning, text generation, planning   |
+| Amazon Rekognition| Image detection and labeling               |
+| AWS Lambda        | Core agent logic and orchestration         |
+| API Gateway       | Public HTTP interface                      |
+| Amazon S3         | Static frontend hosting                    |
 
 ## 🚀 Features
 
@@ -58,30 +60,38 @@ Amazon S3	Static frontend hosting
 
 📦 Static frontend hosting
 
-⚙️ Local Development Setup
+## ⚙️ Local Development Setup
 
-## 1️⃣ Install uv (Fast Python Package Manager)
+### 1️⃣ Install uv (Fast Python Package Manager)
 
 uv replaces pip and venv management.
 
-Mac / Linux
+**Mac / Linux:**
+```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
-Windows (PowerShell)
+**Windows (PowerShell):**
+```powershell
 irm https://astral.sh/uv/install.ps1 | iex
+```
 
-Verify installation:
+Verify: `uv --version`
 
-uv --version
-## 2️⃣ Create Project Environment
+### 2️⃣ Create Project Environment
 
-Inside your project root:
-
+In project root:
+```bash
 uv venv
+```
 
-## 3️⃣ Activate Virtual Environment
-Mac / Linux
-source .venv/bin/activate
+### 3️⃣ Activate Virtual Environment
 
-Windows
-.venv\Scripts\activate
+**Mac / Linux:** `source .venv/bin/activate`  
+**Windows:** `.venv\Scripts\activate`
+
+### 4️⃣ Install dependencies
+
+```bash
+uv sync
+```

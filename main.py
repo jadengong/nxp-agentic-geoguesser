@@ -1,6 +1,7 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
-import tempfile
 import os
+import tempfile
+
+from fastapi import FastAPI, File, HTTPException, UploadFile
 
 import image_detection
 
@@ -16,7 +17,11 @@ async def root():
 
 
 @app.post("/detect")
-async def detect_image(file: UploadFile = File(...)):
+async def detect_image(
+    file: UploadFile = File(...),
+    candidate_labels: list[str] | None = None,
+    score_threshold: float = 0.15,
+):
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise HTTPException(
             status_code=400,
@@ -36,7 +41,11 @@ async def detect_image(file: UploadFile = File(...)):
         temp_path = tmp.name
 
     try:
-        labels = image_detection.get_image_labels(temp_path)
+        labels = image_detection.get_image_labels(
+            temp_path,
+            candidate_labels=candidate_labels,
+            score_threshold=score_threshold,
+        )
     finally:
         if os.path.exists(temp_path):
             os.remove(temp_path)
